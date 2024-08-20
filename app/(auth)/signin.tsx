@@ -1,10 +1,11 @@
-import { View, Text, ScrollView, Image, Alert, StyleSheet } from "react-native";
-import React, { useState } from "react";
+import { View, Text, ScrollView, Image, StyleSheet, Alert } from "react-native";
+import React, { useState, useContext } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
-import images from "../../constants/images";
-import FormField from "../../components/FormField";
+import images from "@/constants/images";
+import FormField from "@/components/FormField";
 import { Link, router } from "expo-router";
-import CustomButton from "../../components/CustomButton";
+import CustomButton from "@/components/CustomButton";
+import AuthContext from "@/context/auth/authContext";
 
 interface FormState {
   email: string;
@@ -14,6 +15,7 @@ interface FormState {
 const SignIn: React.FC = () => {
   const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/i;
   const passwordPattern = /^(?=.*[A-Z])(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,}$/;
+  const { login, loading, success, message } = useContext(AuthContext);
 
   const [form, setForm] = useState<FormState>({
     email: "",
@@ -53,36 +55,48 @@ const SignIn: React.FC = () => {
     const isPasswordValid = validatePassword(form.password);
 
     if (!form.email) {
-      Alert.alert("Error", "Please enter your email");
+      Alert.alert("Error!", "Please enter your email");
       return false;
     }
     if (!form.password) {
-      Alert.alert("Error", "Please enter your password");
+      Alert.alert("Error!", "Please enter your password");
       return false;
     }
     return isEmailValid && isPasswordValid;
   };
 
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!validateForm()) return;
 
-    setIsLoading(true);
     try {
-      console.log(form);
-      Alert.alert("Success", "You have successfully logged in", [
-        {
-          text: "OK",
-          onPress: () => router.push("/home"),
-        },
-      ]);
+      await login(form.email, form.password);
+      if (!success) {
+        Alert.alert("Login Error", message);
+        return;
+      }
+      console.log("Logged in successfully");
+
+      // Alert.alert("Success!", "You have successfully logged in", [
+      //   {
+      //     text: "OK",
+      //     onPress: () => router.push("/home"),
+      //   },
+      // ]);
     } catch (error) {
-      console.log(error);
-    } finally {
-      setIsLoading(false);
+      Alert.alert("Login Error", "An error occurred during login.");
+      console.error(error);
     }
   };
+
+  if (loading) {
+    return (
+      <SafeAreaView style={styles.safeArea}>
+        <View style={styles.mainContainer}>
+          <Text>Loading...</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -114,7 +128,6 @@ const SignIn: React.FC = () => {
             value={form.password}
             keyboardType="default"
             placeholder="Enter your password"
-            secureTextEntry={true}
             handleChange={(e) => {
               setForm({ ...form, password: e });
               validatePassword(e); // validate on change
@@ -139,7 +152,7 @@ const SignIn: React.FC = () => {
             containerStyles={styles.buttonContainer}
             onPress={handleSubmit}
             textStyles={styles.buttonText}
-            isLoading={isLoading}
+            isLoading={loading} // Use loading from context
           />
 
           <View style={styles.signUpContainer}>
