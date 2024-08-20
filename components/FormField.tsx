@@ -5,6 +5,7 @@ import {
   Image,
   TouchableWithoutFeedback,
   KeyboardTypeOptions,
+  StyleSheet,
 } from "react-native";
 import React, { useState } from "react";
 import icons from "../constants/icons";
@@ -14,7 +15,7 @@ interface FormFieldProps {
   value: string;
   placeholder: string;
   handleChange: (text: string) => void;
-  textInputStyles?: string;
+  textInputStyles?: object;
   keyboardType?: KeyboardTypeOptions;
 }
 
@@ -29,15 +30,11 @@ const FormField: React.FC<FormFieldProps> = ({
   const [showPassword, setShowPassword] = useState(true);
 
   return (
-    <View className="space-y-2">
-      <Text className={`text-base text-white font-pmedium ${textInputStyles}`}>
-        {title}
-      </Text>
-      <View
-        className={`flex-row items-center bg-black-100 border-black-200 focus:border-secondary border-2 h-14 rounded-2xl px-4`}
-      >
+    <View style={styles.container}>
+      <Text style={[styles.label, textInputStyles]}>{title}</Text>
+      <View style={styles.inputContainer}>
         <TextInput
-          className="text-white text-base font-psemibold w-[90%]"
+          style={styles.textInput}
           value={value}
           secureTextEntry={title === "Password" && showPassword}
           onChangeText={handleChange}
@@ -46,7 +43,15 @@ const FormField: React.FC<FormFieldProps> = ({
           maxLength={title === "Phone Number" ? 10 : 100}
           placeholderTextColor="#7b7b8b"
           autoComplete={
-            title === "Phone Number" ? "tel" : String(title).toLowerCase()
+            title === "Phone Number"
+              ? "tel"
+              : title === "Email"
+              ? "email"
+              : title === "Password"
+              ? "password"
+              : title === "Name"
+              ? "name"
+              : "off"
           }
         />
 
@@ -55,9 +60,11 @@ const FormField: React.FC<FormFieldProps> = ({
             onPress={() => setShowPassword(!showPassword)}
           >
             <Image
-              className="absolute right-4 h-6 w-6"
+              style={[
+                styles.icon,
+                { tintColor: showPassword ? "#7b7b8b" : "#FF9C01" },
+              ]}
               resizeMode="contain"
-              tintColor={showPassword ? "#7b7b8b" : "#FF9C01"}
               source={showPassword ? icons.eye : icons.eyeHide}
             />
           </TouchableWithoutFeedback>
@@ -66,5 +73,39 @@ const FormField: React.FC<FormFieldProps> = ({
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    marginBottom: 8,
+  },
+  label: {
+    fontSize: 16,
+    color: "#FFFFFF",
+    fontFamily: "Poppins-Medium",
+    marginBottom: 4,
+  },
+  inputContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#1E1E2D",
+    borderColor: "#232533",
+    borderWidth: 2,
+    height: 56,
+    borderRadius: 16,
+    paddingHorizontal: 16,
+  },
+  textInput: {
+    color: "#FFFFFF",
+    fontSize: 16,
+    fontFamily: "Poppins-SemiBold",
+    width: "90%",
+  },
+  icon: {
+    position: "absolute",
+    right: 16,
+    height: 24,
+    width: 24,
+  },
+});
 
 export default FormField;

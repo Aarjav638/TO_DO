@@ -2,12 +2,13 @@ import { ScrollView, Text, View, Image, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import images from "../constants/images";
 import { StatusBar } from "expo-status-bar";
-import { router } from "expo-router";
+import { useRouter } from "expo-router";
 
 import CustomButton from "../components/CustomButton";
 import React from "react";
 
 const Index: React.FC = () => {
+  const router = useRouter();
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.scrollViewContent}>
@@ -17,13 +18,11 @@ const Index: React.FC = () => {
             style={styles.logo}
             resizeMode="contain"
           />
-
           <Image
             source={images.cards}
             style={styles.cards}
             resizeMode="contain"
           />
-
           <View style={styles.textContainer}>
             <Text style={styles.title}>
               Stay Organized and On Track with
@@ -43,6 +42,7 @@ const Index: React.FC = () => {
             title={"Get Started"}
             onPress={() => {
               console.log("Get Started");
+              router.push("/signin");
             }}
             containerStyles={styles.buttonContainer}
           />
