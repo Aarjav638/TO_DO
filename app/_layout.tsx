@@ -2,20 +2,11 @@ import { Stack, SplashScreen } from "expo-router";
 import { useFonts } from "expo-font";
 import { useEffect, useState } from "react";
 import React from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-const RootLayout: React.FC = () => {
-  const [token, setToken] = useState<string | null>(null);
-  const loadToken = async () => {
-    const token = await AsyncStorage.getItem("token");
-    if (token) {
-      setToken(token);
-    }
-  };
-  useEffect(() => {
-    loadToken();
-  }, []);
+import AuthProvider from "@/context/auth/authProvider";
 
+const RootLayout: React.FC = () => {
   SplashScreen.preventAutoHideAsync();
+
   const [fontsLoaded, error] = useFonts({
     "Poppins-Black": require("../assets/fonts/Poppins-Black.ttf"),
     "Poppins-Bold": require("../assets/fonts/Poppins-Bold.ttf"),
@@ -36,12 +27,13 @@ const RootLayout: React.FC = () => {
       throw new Error("Error loading fonts");
     }
   }, [fontsLoaded, error]);
-  if (!fontsLoaded || error) {
+
+  if (!fontsLoaded) {
     return null;
   }
 
-  if (!token) {
-    return (
+  return (
+    <AuthProvider>
       <Stack
         screenOptions={{
           headerShown: false,
@@ -49,19 +41,7 @@ const RootLayout: React.FC = () => {
       >
         <Stack.Screen name="index" />
       </Stack>
-    );
-  }
-
-  //return to home page in tab mavigator
-
-  return (
-    <Stack
-      screenOptions={{
-        headerShown: false,
-      }}
-    >
-      <Stack.Screen name="(tabs)" />
-    </Stack>
+    </AuthProvider>
   );
 };
 

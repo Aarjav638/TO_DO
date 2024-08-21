@@ -44,7 +44,7 @@ if (getRNMinorVersion() >= 75) {
   }
 }
 
-rootProject.name = 'TO-DO'
+rootProject.name = 'TaskMaster'
 
 dependencyResolutionManagement {
   versionCatalogs {

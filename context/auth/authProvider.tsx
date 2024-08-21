@@ -1,19 +1,15 @@
-// AuthProvider.tsx
 import React, { useState, useEffect, ReactNode } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios, { setAuthToken } from "../axiosConfig";
 import AuthContext, { User } from "./authContext";
-
 interface AuthProviderProps {
   children: ReactNode;
 }
 
 const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [success, setSuccess] = useState<boolean>(false);
-  const [message, setMessage] = useState<string>("");
-
+  const [token, setToken] = useState<string>("");
+  const [loading, setLoading] = useState(true);
   useEffect(() => {
     const loadUserData = async () => {
       try {
@@ -22,130 +18,116 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         if (token && storedUser) {
           const parsedUser: User = JSON.parse(storedUser);
           setUser(parsedUser);
-          setAuthToken(token);
+          setToken(token);
+          axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
         }
       } catch (error) {
-        console.error(error);
+        console.error("Error loading user data", error);
       } finally {
         setLoading(false);
       }
     };
+
     loadUserData();
   }, []);
 
-  const login = async (email: string, password: string): Promise<void> => {
-    // console.log("emial", email, "password", password);
+  const login = async (email: string, password: string): Promise<string> => {
     try {
-      setLoading(true);
       const response = await axios.post("auth/login", { email, password });
-      // console.log(response.data);
+      const { success, token, user: userData } = response.data;
 
-      const { success, token, user: userData, message } = await response.data;
-      const parsedUser: User = await userData;
-      await setUser(parsedUser);
-      await AsyncStorage.setItem("token", token);
-      await AsyncStorage.setItem("user", JSON.stringify(parsedUser));
-      setAuthToken(token);
-      setSuccess(success);
-      setMessage(message);
+      if (success) {
+        const parsedUser: User = userData;
+        setUser(parsedUser);
+        setAuthToken(token);
+        await AsyncStorage.setItem("token", token);
+        await AsyncStorage.setItem("user", JSON.stringify(parsedUser));
+        return "Login successful";
+      } else {
+        return "Login failed: Unsuccessful response";
+      }
     } catch (err) {
-      setLoading(false);
-      console.log((err as any)?.response?.data?.message);
-      setMessage((err as any)?.response?.data?.message);
-    } finally {
-      setLoading(false);
+      return (err as any)?.response?.data?.message || "Login failed";
     }
   };
-
   const signup = async (
     name: string,
     email: string,
     password: string,
     phoneNumber: string
-  ): Promise<void> => {
+  ): Promise<string> => {
     try {
-      setLoading(true);
       const response = await axios.post("auth/register", {
         name,
         email,
         password,
         phoneNumber,
       });
-      const { success, user: userData, message } = response.data;
-      const parsedUser: User = userData;
-      setUser(parsedUser);
-      await AsyncStorage.setItem("user", JSON.stringify(parsedUser));
-      setSuccess(success);
-      setMessage(message);
+
+      const { success } = response.data;
+
+      if (success) {
+        return "SignUp successful";
+      } else {
+        return "SignUp failed: Unsuccessful response";
+      }
     } catch (err) {
-      setLoading(false);
-      setMessage((err as any)?.response?.data?.message);
-    } finally {
-      setLoading(false);
+      return (err as any)?.response?.data?.message || "SignUp failed";
     }
   };
+
   const updateProfile = async (
     email: string,
     name: string,
     password: string,
     phoneNumber: string
-  ): Promise<void> => {
+  ): Promise<string> => {
     try {
-      setLoading(true);
       const response = await axios.put("auth/update-profile", {
         email,
         name,
         password,
         phoneNumber,
       });
-      const { success, updateduser: userData, message } = await response.data;
-      const parsedUser: User = userData;
-      setUser(parsedUser);
-      await AsyncStorage.setItem("user", JSON.stringify(parsedUser));
-      setSuccess(success);
-      setMessage(message);
+
+      const { success, updateduser: userData } = response.data;
+
+      if (success) {
+        const parsedUser: User = userData;
+        setUser(parsedUser);
+        await AsyncStorage.setItem("user", JSON.stringify(parsedUser));
+        return "Update successful";
+      } else {
+        return "Update failed: Unsuccessful response";
+      }
     } catch (err) {
-      setLoading(false);
-      console.log((err as any)?.response?.data?.message);
-      setMessage((err as any)?.response?.data?.message);
-    } finally {
-      setLoading(false);
+      return (err as any)?.response?.data?.message || "Update failed";
     }
   };
 
   const logout = async (): Promise<void> => {
     try {
-      setLoading(true);
       await AsyncStorage.removeItem("token");
       await AsyncStorage.removeItem("user");
+
       setUser(null);
-      setAuthToken(null);
-      setSuccess(true);
+      axios.defaults.headers.common["Authorization"] = "";
     } catch (err) {
-      setLoading(false);
-      console.error("Logout failed", err);
-    } finally {
-      setLoading(false);
+      console.error("Error logging out", err);
     }
   };
-
-  // const clearError = () => setError("");
-
+  if (loading) {
+    return null;
+  }
   return (
     <AuthContext.Provider
       value={{
         user,
-        setUser,
         login,
         signup,
         logout,
-        loading,
-        success,
-        message,
-        // error,
+        token,
         updateProfile,
-        // setError,
-        // clearError,
       }}
     >
       {children}

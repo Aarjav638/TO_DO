@@ -35,15 +35,30 @@ const TabLayout: React.FC = () => {
           }}
         />
         <Tabs.Screen
-          name="post"
+          name="addnotes/[id]"
           options={{
-            title: "Create Post",
+            title: "Create Note",
             headerShown: false,
             tabBarIcon: ({ color, focused }) => (
               <TabIcon
-                icon={icons.home}
+                icon={icons.plus}
                 color={color}
-                name="Create Post"
+                name="Create Note"
+                focused={focused}
+              />
+            ),
+          }}
+        />
+        <Tabs.Screen
+          name="notedetails/[id]"
+          options={{
+            title: "Notes Details",
+            headerShown: false,
+            tabBarIcon: ({ color, focused }) => (
+              <TabIcon
+                icon={icons.bookmark}
+                color={color}
+                name="Notes Details"
                 focused={focused}
               />
             ),

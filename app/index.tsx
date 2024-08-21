@@ -2,7 +2,7 @@ import { ScrollView, Text, View, Image, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import images from "../constants/images";
 import { StatusBar } from "expo-status-bar";
-import { useRouter } from "expo-router";
+import { useRouter, Redirect } from "expo-router";
 
 import CustomButton from "../components/CustomButton";
 import React from "react";
@@ -42,7 +42,7 @@ const Index: React.FC = () => {
             title={"Get Started"}
             onPress={() => {
               console.log("Get Started");
-              router.push("/signin");
+              router.push("/signIn");
             }}
             containerStyles={styles.buttonContainer}
           />

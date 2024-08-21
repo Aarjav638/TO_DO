@@ -8,7 +8,7 @@
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "splash": {
-      "image": "./assets/images/logo.png",
+      "image": "./assets/images/logo-samll.png",
       "resizeMode": "contain",
       "backgroundColor": "#161622"
     },
@@ -22,7 +22,6 @@
         "icon": "./assets/images/logo-small.png"
       },
       "permissions": [
-        "CAMERA",
         "READ_EXTERNAL_STORAGE",
         "WRITE_EXTERNAL_STORAGE"
       ],
