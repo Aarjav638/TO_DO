@@ -22,7 +22,7 @@ const EditNotes: React.FC = () => {
   const richText = useRef<RichEditor>(null);
   const router = useRouter();
   const { id } = useLocalSearchParams();
-
+  const [imageUri, setImageUri] = useState<string>("");
   useEffect(() => {
     if (id) {
       const note = notes.find((n) => n._id === id);
@@ -45,7 +45,7 @@ const EditNotes: React.FC = () => {
 
     try {
       if (id) {
-        await updateNote(id.toString(), { title, description });
+        await updateNote(id.toString(), { title, description, imageUri });
         Alert.alert(
           "Success",
           "Note updated successfully 🎉 \nPull down to refresh "
@@ -71,6 +71,7 @@ const EditNotes: React.FC = () => {
     console.log(result);
 
     if (!result.canceled) {
+      setImageUri(result.assets[0].uri);
       richText.current?.insertImage(result.assets[0].uri);
     }
   };

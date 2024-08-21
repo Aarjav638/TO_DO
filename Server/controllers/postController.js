@@ -2,7 +2,7 @@ const postSchema = require("../models/postModel");
 
 const createPostController = async (req, res) => {
   try {
-    const { title, description } = req.body;
+    const { title, description, imageUri } = req.body;
 
     if (!title || !description) {
       return res
@@ -13,6 +13,7 @@ const createPostController = async (req, res) => {
     const post = new postSchema({
       title,
       description,
+      image: imageUri,
       postedBy: req.auth._id,
     });
 
@@ -84,7 +85,7 @@ const deletePostController = async (req, res) => {
 const updatePostController = async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, description } = req.body;
+    const { title, description, imageUri } = req.body;
 
     const existingPost = await postSchema.findById({ _id: id });
 
@@ -107,6 +108,7 @@ const updatePostController = async (req, res) => {
       {
         title: title || existingPost.title,
         description: description || existingPost.description,
+        image: imageUri || existingPost.image,
       },
       { new: true }
     );

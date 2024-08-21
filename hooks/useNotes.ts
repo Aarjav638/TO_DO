@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "@/context/axiosConfig";
@@ -7,18 +8,21 @@ export interface Note {
   _id: string;
   title: string;
   description: string;
+  image?: string;
 }
 
 export interface NewNote {
   _id?: string;
   title: string;
   description: string;
+  imageUri?: string;
 }
 
 export interface UpdatedNote {
   _id?: string;
   title?: string;
   description?: string;
+  imageUri?: string;
 }
 
 interface OfflineAction {

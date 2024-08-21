@@ -22,7 +22,7 @@ const AddNotes: React.FC = () => {
   const [description, setDescription] = useState("");
   const richText = useRef<RichEditor>(null);
   const router = useRouter();
-  const [imageUri, setImageUri] = useState<string | null>(null);
+  const [imageUri, setImageUri] = useState<string>("");
   const handleSaveNote = async () => {
     if (!title || !description) {
       Alert.alert("Error", "Please fill in all fields");
@@ -30,7 +30,7 @@ const AddNotes: React.FC = () => {
     }
 
     try {
-      await addNote({ title, description });
+      await addNote({ title, description, imageUri });
       Alert.alert(
         "Success",
         "Note added successfully  🎉\n Pull down to refresh "
@@ -38,10 +38,7 @@ const AddNotes: React.FC = () => {
 
       setTitle("");
       setDescription("");
-      router.push({
-        pathname: "/home",
-        params: { uri: imageUri },
-      });
+      router.push("/home");
     } catch (error) {
       Alert.alert("Error", "An error occurred while saving the note");
     }

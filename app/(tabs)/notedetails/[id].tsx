@@ -11,6 +11,10 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import CustomButton from "@/components/CustomButton";
 import useNotes, { Note } from "@/hooks/useNotes"; // Import Note type
+
+interface NoteDetails extends Note {
+  image: string;
+}
 import * as FileSystem from "expo-file-system";
 import * as Sharing from "expo-sharing";
 import * as Print from "expo-print";
@@ -23,7 +27,8 @@ const NoteDetails: React.FC = () => {
   const [showModal, setShowModal] = React.useState(false);
   // Find the note with the matching id
   const note: Note | undefined = notes.find((n) => n._id === id);
-  console.log("uri", uri);
+  console.log("note", note);
+  console.log("uri", note?.image);
   // Handle case where note is not found
   if (!note) {
     return (
@@ -116,7 +121,11 @@ const NoteDetails: React.FC = () => {
         <CustomButton
           title="Export as .pdf"
           onPress={() => {
-            exportToPdf(uri);
+            if (note?.image) {
+              exportToPdf(note.image);
+            } else {
+              Alert.alert("Error", "No image available to export");
+            }
           }}
           containerStyles={styles.button}
         />

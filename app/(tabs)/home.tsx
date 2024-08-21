@@ -25,13 +25,13 @@ const HomeScreen: React.FC = () => {
   const router = useRouter();
   const { width } = useWindowDimensions();
   const [hasFetchedNotes, setHasFetchedNotes] = useState(false);
-  const { uri } = useLocalSearchParams<{ uri: string }>();
   // Effect to load notes from AsyncStorage when the component mounts
   useEffect(() => {
     const fetchNotes = async () => {
       const storedNotes = await AsyncStorage.getItem("notes");
       if (storedNotes) {
         loadNotes(JSON.parse(storedNotes));
+        syncNotesWithServer();
       }
       setHasFetchedNotes(true);
     };
@@ -85,7 +85,7 @@ const HomeScreen: React.FC = () => {
           <Link
             href={{
               pathname: "/notedetails/[id]",
-              params: { id: item._id, uri },
+              params: { id: item._id },
             }}
             key={item._id}
             style={styles.noteItem}
