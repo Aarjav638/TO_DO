@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext } from "react";
+import React, { useEffect, useState, useContext, useCallback } from "react";
 import {
   View,
   Text,
@@ -7,6 +7,7 @@ import {
   TextInput,
   RefreshControl,
   useWindowDimensions,
+  Alert,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Link, useRouter } from "expo-router";
@@ -14,6 +15,7 @@ import CustomButton from "@/components/CustomButton";
 import AuthContext from "@/context/auth/authContext";
 import useNotes from "@/hooks/useNotes";
 import RenderHtml from "react-native-render-html";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const HomeScreen: React.FC = () => {
   const { user } = useContext(AuthContext);
@@ -22,16 +24,41 @@ const HomeScreen: React.FC = () => {
   const [refreshing, setRefreshing] = useState(false);
   const router = useRouter();
   const { width } = useWindowDimensions();
+  const [hasFetchedNotes, setHasFetchedNotes] = useState(false);
+
+  // Effect to load notes from AsyncStorage when the component mounts
+  useEffect(() => {
+    const fetchNotes = async () => {
+      const storedNotes = await AsyncStorage.getItem("notes");
+      if (storedNotes) {
+        loadNotes(JSON.parse(storedNotes));
+      }
+      setHasFetchedNotes(true);
+    };
+
+    if (!hasFetchedNotes) {
+      fetchNotes();
+    }
+  }, [hasFetchedNotes, notes]);
 
   useEffect(() => {
-    loadNotes();
-  }, [notes]);
-
-  const onRefresh = async () => {
-    setRefreshing(true);
-    await syncNotesWithServer();
-    setRefreshing(false);
-  };
+    if (hasFetchedNotes) {
+      syncNotesWithServer();
+    }
+  }, [hasFetchedNotes]);
+  // Refresh notes by syncing with server
+  const onRefresh = useCallback(async () => {
+    try {
+      setRefreshing(true);
+      await syncNotesWithServer();
+      setRefreshing(false);
+      alert("Notes synced successfully");
+    } catch (error) {
+      console.error("Failed to sync notes:", error);
+      alert("An error occurred while syncing notes");
+      setRefreshing(false);
+    }
+  }, []);
 
   const filteredNotes = notes.filter(
     (note) =>

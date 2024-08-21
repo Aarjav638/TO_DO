@@ -16,7 +16,7 @@ import * as Sharing from "expo-sharing";
 import * as Print from "expo-print";
 
 const NoteDetails: React.FC = () => {
-  const { notes, deleteNote } = useNotes();
+  const { notes, deleteNote, syncNotesWithServer } = useNotes();
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const [isPending, startTransition] = React.useTransition();
@@ -41,7 +41,10 @@ const NoteDetails: React.FC = () => {
       setShowModal(true); // Show modal immediately when the delete process starts
       await deleteNote(id!);
       setShowModal(false); // Hide modal after deletion
-      Alert.alert("Success", "Note deleted successfully");
+      Alert.alert(
+        "Success",
+        "Note deleted successfully 🎉\n Pull down to refresh "
+      );
       router.push("/home");
     } catch (error) {
       setShowModal(false); // Hide modal even if an error occurs

@@ -14,7 +14,7 @@ import CustomButton from "@/components/CustomButton";
 import useNotes from "@/hooks/useNotes";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { RichEditor, RichToolbar } from "react-native-pell-rich-editor";
-
+import * as ImagePicker from "expo-image-picker";
 const EditNotes: React.FC = () => {
   const { addNote, updateNote, notes } = useNotes();
   const [title, setTitle] = useState("");
@@ -46,7 +46,10 @@ const EditNotes: React.FC = () => {
     try {
       if (id) {
         await updateNote(id.toString(), { title, description });
-        Alert.alert("Success", "Note updated successfully");
+        Alert.alert(
+          "Success",
+          "Note updated successfully 🎉 \nPull down to refresh "
+        );
       }
 
       router.push("/home");
@@ -56,7 +59,21 @@ const EditNotes: React.FC = () => {
     setDescription("");
     setTitle("");
   };
+  const pickImage = async () => {
+    // No permissions request is necessary for launching the image library
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
 
+    console.log(result);
+
+    if (!result.canceled) {
+      richText.current?.insertImage(result.assets[0].uri);
+    }
+  };
   return (
     <SafeAreaView style={styles.safeArea}>
       <KeyboardAvoidingView
@@ -89,8 +106,12 @@ const EditNotes: React.FC = () => {
                 "unorderedList",
                 "orderedList",
                 "link",
+                "customImage",
               ]}
-              style={styles.richToolbar}
+              iconMap={{
+                customImage: () => <Text>🖼️</Text>,
+              }}
+              onPressAddImage={pickImage}
             />
             <CustomButton
               title="Save Note"

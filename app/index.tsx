@@ -1,14 +1,20 @@
+import React, { useCallback } from "react";
 import { ScrollView, Text, View, Image, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import images from "../constants/images";
 import { StatusBar } from "expo-status-bar";
-import { useRouter, Redirect } from "expo-router";
+import { useRouter } from "expo-router";
 
 import CustomButton from "../components/CustomButton";
-import React from "react";
 
 const Index: React.FC = () => {
   const router = useRouter();
+
+  const handleGetStarted = useCallback(() => {
+    console.log("Get Started");
+    router.push("/signIn");
+  }, [router]);
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.scrollViewContent}>
@@ -40,10 +46,7 @@ const Index: React.FC = () => {
           </Text>
           <CustomButton
             title={"Get Started"}
-            onPress={() => {
-              console.log("Get Started");
-              router.push("/signIn");
-            }}
+            onPress={handleGetStarted}
             containerStyles={styles.buttonContainer}
           />
         </View>

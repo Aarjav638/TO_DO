@@ -1,7 +1,6 @@
+import React, { useEffect } from "react";
 import { Stack, SplashScreen } from "expo-router";
 import { useFonts } from "expo-font";
-import { useEffect, useState } from "react";
-import React from "react";
 import AuthProvider from "@/context/auth/authProvider";
 
 const RootLayout: React.FC = () => {
@@ -24,7 +23,7 @@ const RootLayout: React.FC = () => {
       SplashScreen.hideAsync();
     }
     if (error) {
-      throw new Error("Error loading fonts");
+      console.error("Error loading fonts:", error);
     }
   }, [fontsLoaded, error]);
 
@@ -34,11 +33,7 @@ const RootLayout: React.FC = () => {
 
   return (
     <AuthProvider>
-      <Stack
-        screenOptions={{
-          headerShown: false,
-        }}
-      >
+      <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="index" />
       </Stack>
     </AuthProvider>

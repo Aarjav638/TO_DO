@@ -12,11 +12,12 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import FormField from "@/components/FormField";
 import CustomButton from "@/components/CustomButton";
 import useNotes from "@/hooks/useNotes";
-import { useRouter, useLocalSearchParams } from "expo-router";
+import { useRouter } from "expo-router";
 import { RichEditor, RichToolbar } from "react-native-pell-rich-editor";
+import * as ImagePicker from "expo-image-picker";
 
 const AddNotes: React.FC = () => {
-  const { addNote, updateNote, notes } = useNotes();
+  const { addNote } = useNotes();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const richText = useRef<RichEditor>(null);
@@ -30,14 +31,34 @@ const AddNotes: React.FC = () => {
 
     try {
       await addNote({ title, description });
-      Alert.alert("Success", "Note added successfully");
+      Alert.alert(
+        "Success",
+        "Note added successfully  🎉\n Pull down to refresh "
+      );
+
+      setTitle("");
+      setDescription("");
       router.push("/home");
     } catch (error) {
       Alert.alert("Error", "An error occurred while saving the note");
     }
+    setTitle("");
+    setDescription("");
+  };
+  const pickImage = async () => {
+    // No permissions request is necessary for launching the image library
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
 
-    setTitle(""); // Reset title
-    setDescription(""); // Reset description
+    console.log(result);
+
+    if (!result.canceled) {
+      richText.current?.insertImage(result.assets[0].uri);
+    }
   };
 
   return (
@@ -72,8 +93,12 @@ const AddNotes: React.FC = () => {
                 "unorderedList",
                 "orderedList",
                 "link",
+                "customImage",
               ]}
-              style={styles.richToolbar}
+              iconMap={{
+                customImage: () => <Text>🖼️</Text>, // Custom icon for image
+              }}
+              onPressAddImage={pickImage} // Custom handler for image insertion
             />
             <CustomButton
               title="Save Note"
