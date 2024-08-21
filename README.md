@@ -45,9 +45,9 @@ This is an [Expo](https://expo.dev) project created with [`create-expo-app`](htt
    -example
    ```bash
    PORT = 7000
-MONGO_URI = your_mongo_connection String
-JWT_SECRET = ****************
-```
+   MONGO_URI = your_mongo_connection String
+   JWT_SECRET = ****************
+   ```
 8. Install Dependencies
 - ```bash
 npm install
