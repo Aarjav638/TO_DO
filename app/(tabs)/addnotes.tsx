@@ -22,7 +22,7 @@ const AddNotes: React.FC = () => {
   const [description, setDescription] = useState("");
   const richText = useRef<RichEditor>(null);
   const router = useRouter();
-
+  const [imageUri, setImageUri] = useState<string | null>(null);
   const handleSaveNote = async () => {
     if (!title || !description) {
       Alert.alert("Error", "Please fill in all fields");
@@ -38,7 +38,10 @@ const AddNotes: React.FC = () => {
 
       setTitle("");
       setDescription("");
-      router.push("/home");
+      router.push({
+        pathname: "/home",
+        params: { uri: imageUri },
+      });
     } catch (error) {
       Alert.alert("Error", "An error occurred while saving the note");
     }
@@ -46,6 +49,7 @@ const AddNotes: React.FC = () => {
     setDescription("");
   };
   const pickImage = async () => {
+    console.log("Pick image");
     // No permissions request is necessary for launching the image library
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.All,
@@ -57,6 +61,8 @@ const AddNotes: React.FC = () => {
     console.log(result);
 
     if (!result.canceled) {
+      setImageUri(result.assets[0].uri);
+      console.log("Image selected", result.assets[0].uri);
       richText.current?.insertImage(result.assets[0].uri);
     }
   };
@@ -96,9 +102,8 @@ const AddNotes: React.FC = () => {
                 "customImage",
               ]}
               iconMap={{
-                customImage: () => <Text>🖼️</Text>, // Custom icon for image
+                customImage: () => <Text onPress={pickImage}>🖼️</Text>, // Custom icon for image
               }}
-              onPressAddImage={pickImage} // Custom handler for image insertion
             />
             <CustomButton
               title="Save Note"

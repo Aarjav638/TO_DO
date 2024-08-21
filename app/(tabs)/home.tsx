@@ -10,7 +10,7 @@ import {
   Alert,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Link, useRouter } from "expo-router";
+import { Link, useRouter, useLocalSearchParams } from "expo-router";
 import CustomButton from "@/components/CustomButton";
 import AuthContext from "@/context/auth/authContext";
 import useNotes from "@/hooks/useNotes";
@@ -25,7 +25,7 @@ const HomeScreen: React.FC = () => {
   const router = useRouter();
   const { width } = useWindowDimensions();
   const [hasFetchedNotes, setHasFetchedNotes] = useState(false);
-
+  const { uri } = useLocalSearchParams<{ uri: string }>();
   // Effect to load notes from AsyncStorage when the component mounts
   useEffect(() => {
     const fetchNotes = async () => {
@@ -85,7 +85,7 @@ const HomeScreen: React.FC = () => {
           <Link
             href={{
               pathname: "/notedetails/[id]",
-              params: { id: item._id },
+              params: { id: item._id, uri },
             }}
             key={item._id}
             style={styles.noteItem}

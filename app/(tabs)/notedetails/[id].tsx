@@ -14,17 +14,16 @@ import useNotes, { Note } from "@/hooks/useNotes"; // Import Note type
 import * as FileSystem from "expo-file-system";
 import * as Sharing from "expo-sharing";
 import * as Print from "expo-print";
+import { manipulateAsync } from "expo-image-manipulator";
 
 const NoteDetails: React.FC = () => {
   const { notes, deleteNote, syncNotesWithServer } = useNotes();
   const router = useRouter();
-  const { id } = useLocalSearchParams<{ id: string }>();
-  const [isPending, startTransition] = React.useTransition();
+  const { id, uri } = useLocalSearchParams<{ id: string; uri: string }>();
   const [showModal, setShowModal] = React.useState(false);
-
   // Find the note with the matching id
   const note: Note | undefined = notes.find((n) => n._id === id);
-
+  console.log("uri", uri);
   // Handle case where note is not found
   if (!note) {
     return (
@@ -60,10 +59,6 @@ const NoteDetails: React.FC = () => {
         encoding: FileSystem.EncodingType.UTF8,
       });
 
-      // Log or alert the path to debug
-      console.log("File path:", path);
-      Alert.alert("File path", path);
-
       await Sharing.shareAsync(path, { dialogTitle: "Share as .txt" });
     } catch (error) {
       console.error("Error exporting to txt: ", error);
@@ -71,8 +66,16 @@ const NoteDetails: React.FC = () => {
     }
   };
 
-  const exportToPdf = async () => {
+  const exportToPdf = async (imageUri: string) => {
     try {
+      let base64Image = "";
+      if (imageUri) {
+        const manipulatedImage = await manipulateAsync(imageUri, [], {
+          base64: true,
+        });
+        base64Image = `data:image/jpeg;base64,${manipulatedImage.base64}`;
+      }
+
       const htmlContent = `
         <html>
           <head>
@@ -81,6 +84,7 @@ const NoteDetails: React.FC = () => {
           <body>
             <h1>${note.title}</h1>
             <p>${note.description}</p>
+            ${base64Image ? `<img src="${base64Image}" alt="Note Image"/>` : ""}
           </body>
         </html>
       `;
@@ -90,10 +94,6 @@ const NoteDetails: React.FC = () => {
         html: htmlContent,
         base64: false,
       });
-
-      // Log or alert the PDF URI to debug
-      console.log("PDF file path:", uri);
-      Alert.alert("PDF file path", uri);
 
       // Share the generated PDF
       await Sharing.shareAsync(uri, { dialogTitle: "Share as .pdf" });
@@ -115,7 +115,9 @@ const NoteDetails: React.FC = () => {
         />
         <CustomButton
           title="Export as .pdf"
-          onPress={exportToPdf}
+          onPress={() => {
+            exportToPdf(uri);
+          }}
           containerStyles={styles.button}
         />
         <CustomButton

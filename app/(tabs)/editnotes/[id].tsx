@@ -109,9 +109,8 @@ const EditNotes: React.FC = () => {
                 "customImage",
               ]}
               iconMap={{
-                customImage: () => <Text>🖼️</Text>,
+                customImage: () => <Text onPress={pickImage}>🖼️</Text>,
               }}
-              onPressAddImage={pickImage}
             />
             <CustomButton
               title="Save Note"
