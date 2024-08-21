@@ -1,4 +1,3 @@
-const mongoose = require("mongoose");
 const postSchema = require("../models/postModel");
 
 const createPostController = async (req, res) => {
@@ -109,27 +108,47 @@ const deletePostController = async (req, res) => {
 };
 
 const updatePostController = async (req, res) => {
-  const { id } = req.params;
-  const { note } = req.body;
-
-  if (!mongoose.Types.ObjectId.isValid(id)) {
-    return res.status(400).send({ error: "Invalid ID" });
-  }
-
   try {
-    const updatedPost = await Post.findByIdAndUpdate(
-      mongoose.Types.ObjectId(id),
-      note,
+    const { id } = req.params;
+    const { title, description } = req.body;
+
+    const existingPost = await postSchema.findById({ _id: id });
+
+    if (!existingPost) {
+      return res.status(404).json({
+        success: false,
+        message: "Post not found",
+      });
+    }
+
+    if (!title && !description) {
+      return res.status(400).json({
+        success: false,
+        message: "Please fill at least one field to update",
+      });
+    }
+
+    const updatedPost = await postSchema.findOneAndUpdate(
+      { _id: id },
+      {
+        title: title || existingPost.title,
+        description: description || existingPost.description,
+      },
       { new: true }
     );
 
-    if (!updatedPost) {
-      return res.status(404).send({ error: "Post not found" });
-    }
-
-    res.status(200).send({ updatedPost });
+    res.status(200).json({
+      success: true,
+      message: "Post updated successfully",
+      updatedPost,
+    });
   } catch (error) {
-    res.status(500).send({ error: "Error updating post" });
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+      error: error.message,
+    });
   }
 };
 

@@ -15,7 +15,7 @@ import useNotes from "@/hooks/useNotes";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { RichEditor, RichToolbar } from "react-native-pell-rich-editor";
 
-const AddNotes: React.FC = () => {
+const EditNotes: React.FC = () => {
   const { addNote, updateNote, notes } = useNotes();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -30,6 +30,9 @@ const AddNotes: React.FC = () => {
         setTitle(note.title);
         setDescription(note.description);
       }
+    } else {
+      setTitle("");
+      setDescription("");
     }
   }, [id]);
 
@@ -44,14 +47,14 @@ const AddNotes: React.FC = () => {
       if (id) {
         await updateNote(id.toString(), { title, description });
         Alert.alert("Success", "Note updated successfully");
-      } else {
-        await addNote({ title, description });
-        Alert.alert("Success", "Note added successfully");
       }
+
       router.push("/home");
     } catch (error) {
       Alert.alert("Error", "An error occurred while saving the note");
     }
+    setDescription("");
+    setTitle("");
   };
 
   return (
@@ -62,7 +65,7 @@ const AddNotes: React.FC = () => {
       >
         <ScrollView contentContainerStyle={styles.scrollView}>
           <View style={styles.container}>
-            <Text style={styles.header}>{id ? "Edit Note" : "Add Note"}</Text>
+            <Text style={styles.header}>{"Edit Note"}</Text>
             <FormField
               title="Title"
               value={title}
@@ -143,4 +146,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default AddNotes;
+export default EditNotes;

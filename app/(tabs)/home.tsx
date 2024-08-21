@@ -17,7 +17,7 @@ import RenderHtml from "react-native-render-html";
 
 const HomeScreen: React.FC = () => {
   const { user } = useContext(AuthContext);
-  const { notes, loadNotes } = useNotes();
+  const { notes, loadNotes, syncNotesWithServer } = useNotes();
   const [searchQuery, setSearchQuery] = useState("");
   const [refreshing, setRefreshing] = useState(false);
   const router = useRouter();
@@ -25,11 +25,11 @@ const HomeScreen: React.FC = () => {
 
   useEffect(() => {
     loadNotes();
-  }, []);
+  }, [notes]);
 
   const onRefresh = async () => {
     setRefreshing(true);
-    await loadNotes();
+    await syncNotesWithServer();
     setRefreshing(false);
   };
 
@@ -79,9 +79,11 @@ const HomeScreen: React.FC = () => {
         }
       />
       <CustomButton
-        title="Add New Note"
-        onPress={() => router.push("/addnote")}
-        containerStyles={styles.addButton}
+        title="Add Note"
+        onPress={() => {
+          router.push("/addnotes");
+        }}
+        style={styles.addButton}
       />
     </SafeAreaView>
   );

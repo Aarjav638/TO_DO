@@ -1,5 +1,12 @@
 import React from "react";
-import { View, Text, StyleSheet, Alert } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Alert,
+  ActivityIndicator,
+  Modal,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import CustomButton from "@/components/CustomButton";
@@ -12,6 +19,8 @@ const NoteDetails: React.FC = () => {
   const { notes, deleteNote } = useNotes();
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
+  const [isPending, startTransition] = React.useTransition();
+  const [showModal, setShowModal] = React.useState(false);
 
   // Find the note with the matching id
   const note: Note | undefined = notes.find((n) => n._id === id);
@@ -29,10 +38,13 @@ const NoteDetails: React.FC = () => {
 
   const handleDelete = async () => {
     try {
+      setShowModal(true); // Show modal immediately when the delete process starts
       await deleteNote(id!);
+      setShowModal(false); // Hide modal after deletion
       Alert.alert("Success", "Note deleted successfully");
       router.push("/home");
     } catch (error) {
+      setShowModal(false); // Hide modal even if an error occurs
       Alert.alert("Error", "An error occurred while deleting the note");
     }
   };
@@ -105,7 +117,7 @@ const NoteDetails: React.FC = () => {
         />
         <CustomButton
           title="Edit Note"
-          onPress={() => router.push(`/addnotes/${id}`)}
+          onPress={() => router.push(`/editnotes/${id}`)}
           containerStyles={styles.button}
         />
         <CustomButton
@@ -114,6 +126,21 @@ const NoteDetails: React.FC = () => {
           containerStyles={styles.deleteButton}
         />
       </View>
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={showModal}
+        onRequestClose={() => {
+          setShowModal(false);
+        }}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContainer}>
+            <ActivityIndicator size="large" color="#FF8E01" />
+            <Text style={styles.modalText}>deleting...</Text>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 };
@@ -144,6 +171,25 @@ const styles = StyleSheet.create({
   deleteButton: {
     marginTop: 16,
     backgroundColor: "#FF0000",
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  modalContainer: {
+    width: 200,
+    padding: 20,
+    backgroundColor: "#FFF",
+    borderRadius: 10,
+    alignItems: "center",
+  },
+  modalText: {
+    marginTop: 10,
+    fontSize: 16,
+    color: "#333",
+    fontFamily: "Poppins-SemiBold",
   },
 });
 
