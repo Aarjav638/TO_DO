@@ -1,25 +1,31 @@
 {
   "expo": {
-    "name": "TO-DO",
-    "slug": "TO-DO",
+    "name": "TaskMaster",
+    "slug": "TaskMaster",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "splash": {
-      "image": "./assets/images/splash.png",
+      "image": "./assets/images/logo-samll.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#161622"
     },
     "ios": {
       "supportsTablet": true
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
-      }
+        "foregroundImage": "./assets/images/logo-small.png",
+        "backgroundColor": "#161622",
+        "icon": "./assets/images/logo-small.png"
+      },
+      "permissions": [
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE"
+      ],
+      "package": "com.aarjav_jain.TODO"
     },
     "web": {
       "bundler": "metro",

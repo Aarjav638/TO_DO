@@ -10,7 +10,7 @@ const registerController = async (req, res) => {
   try {
     const { name, email, password, phoneNumber } = req.body;
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
+    console.log(email);
     if (!name || !email || !password || !phoneNumber) {
       return res.status(400).json({
         success: false,
@@ -50,6 +50,15 @@ const registerController = async (req, res) => {
       });
     }
 
+    const existingPhoneNumber = await userModel.findOne({ phoneNumber });
+
+    if (existingPhoneNumber) {
+      return res.status(400).json({
+        success: false,
+        message: "User with this PhoneNumber already exists",
+      });
+    }
+
     //hash password
 
     const hashedPassword = await hashPassword(password);
@@ -70,7 +79,6 @@ const registerController = async (req, res) => {
       user,
     });
   } catch (error) {
-    console.error(error);
     return res.status(500).json({
       success: false,
       message: "Server error. Please try again later.",

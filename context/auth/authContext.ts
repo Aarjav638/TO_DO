@@ -9,19 +9,16 @@ export interface User {
 
 interface AuthContextType {
   user: User | null;
-  setUser: (user: User | null) => void;
   logout: () => void;
-  login: (email: string, password: string) => Promise<void>;
-  signup: (name: string, email: string, password: string, phoneNumber: string) => Promise<void>;
-  success: boolean;
-  message: string;
-  loading: boolean;
+  login: (email: string, password: string) => Promise<string>;
+  signup: (name: string, email: string, password: string, phoneNumber: string) =>  Promise<string>;
+  token: string ;
     updateProfile: (
         email: string,
         name: string,
         password: string,
         phoneNumber: string
-    ) => Promise<void>;
+    ) =>Promise<string>;
 }
 
 const AuthContext = createContext<AuthContextType>({} as AuthContextType);

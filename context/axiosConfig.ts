@@ -6,11 +6,21 @@ axios.defaults.baseURL = "http://192.168.1.7:7000/api/v1/";
 
 // Function to set the Authorization header
 export const setAuthToken = (token: string | null) => {
+  console.log("Setting token:", token);
   if (token) {
     axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
   } else {
     delete axios.defaults.headers.common["Authorization"];
   }
 };
+// axios.interceptors.request.use(request => {
+//   console.log('Starting Request', request)
+//   return request
+// })
+
+// axios.interceptors.response.use(response => {
+//   console.log('Response:', response)
+//   return response
+// })
 
 export default axios;

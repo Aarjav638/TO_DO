@@ -1,5 +1,14 @@
-import { View, Text, ScrollView, Image, StyleSheet, Alert } from "react-native";
-import React, { useState, useContext } from "react";
+import {
+  View,
+  Text,
+  ScrollView,
+  Image,
+  StyleSheet,
+  Alert,
+  ActivityIndicator,
+  Modal,
+} from "react-native";
+import React, { useState, useContext, useTransition } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import images from "../../constants/images";
 import FormField from "../../components/FormField";
@@ -15,8 +24,9 @@ interface FormState {
 }
 
 const SignUp: React.FC = () => {
-  const { signup, loading, error, clearError } = useContext(AuthContext);
-
+  const { signup } = useContext(AuthContext);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [isPending, startTransition] = useTransition();
   const [form, setForm] = useState<FormState>({
     name: "",
     email: "",
@@ -82,22 +92,30 @@ const SignUp: React.FC = () => {
   const handleSubmit = async () => {
     if (!validateForm()) return;
 
-    try {
-      const success = await signup(
-        form.name,
-        form.email,
-        form.password,
-        form.phoneNumber
-      );
+    setModalVisible(true); // Show modal with spinner
 
-      if (success) {
-        Alert.alert("Success! Signup successful!");
-        router.push("/signin");
-      }
-    } catch (error: any) {
-      Alert.alert("Signup Error", "An error occurred during signup.");
-      console.log(error.response.data.message);
-    }
+    startTransition(() => {
+      signup(form.name, form.email, form.password, form.phoneNumber)
+        .then((message) => {
+          Alert.alert("Message", message, [
+            {
+              text: "OK",
+              onPress: () => {
+                if (message === "SignUp successful") {
+                  router.push("/signIn");
+                }
+              },
+            },
+          ]);
+        })
+        .catch((error) => {
+          Alert.alert("SignUp Error", error.toString());
+          console.log(error);
+        })
+        .finally(() => {
+          setModalVisible(false);
+        });
+    });
   };
 
   return (
@@ -172,21 +190,36 @@ const SignUp: React.FC = () => {
           />
 
           <CustomButton
-            title="Signup"
+            title={isPending ? "Signing Up..." : "Signup"}
             containerStyles={styles.buttonContainer}
             onPress={handleSubmit}
             textStyles={styles.buttonText}
-            isLoading={loading} // Use loading from context
+            isLoading={isPending} // Use loading from context
           />
 
           <View style={styles.signInContainer}>
             <Text style={styles.signInText}>Already have an account? </Text>
-            <Link href="/signin" style={styles.signInLink}>
+            <Link href="/signIn" style={styles.signInLink}>
               Sign In
             </Link>
           </View>
         </View>
       </ScrollView>
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => {
+          setModalVisible(false);
+        }}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContainer}>
+            <ActivityIndicator size="large" color="#FF8E01" />
+            <Text style={styles.modalText}>Logging in...</Text>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 };
@@ -255,6 +288,25 @@ const styles = StyleSheet.create({
   },
   passwordErrorsContainer: {
     marginTop: 8,
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  modalContainer: {
+    width: 200,
+    padding: 20,
+    backgroundColor: "#FFF",
+    borderRadius: 10,
+    alignItems: "center",
+  },
+  modalText: {
+    marginTop: 10,
+    fontSize: 16,
+    color: "#333",
+    fontFamily: "Poppins-SemiBold",
   },
 });
 
