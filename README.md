@@ -4,17 +4,36 @@ This is an [Expo](https://expo.dev) project created with [`create-expo-app`](htt
 
 ## Get started
 
-1. Install dependencies
+1. Cloning Git repo
+
+   ```bash
+   git clone https://github.com/Aarjav638/TO_DO.git
+   ```
+
+2. Moving to TO_DO Dir..
+
+   ```bash
+   cd TO_DO
+   ```
+
+3. Install dependencies
 
    ```bash
    npm install
    ```
 
-2. Start the app
+4. Start the app
 
    ```bash
-    npx expo start
+    npx expo start --tunnel -c
    ```
+
+5. Run app on mobile device
+
+- Running on Android
+- 1. download expo go from playstore and scan the qr code
+- Running on Ios
+- 1. open camera app and scan the qr code
 
 In the output, you'll find options to open the app in a
 
@@ -48,4 +67,5 @@ Join our community of developers creating universal apps.
 
 - [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
 - [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+
 # TO_DO
