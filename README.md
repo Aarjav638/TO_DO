@@ -35,6 +35,29 @@ This is an [Expo](https://expo.dev) project created with [`create-expo-app`](htt
 - Running on Ios
 - 1. open camera app and scan the qr code
 
+6. Running the backend 
+
+- Move to Server Dir located inside TO_DO
+  ```bash
+  cd Server
+  ```
+7. Create a .env File
+   -example
+   ```bash
+   PORT = 7000
+MONGO_URI = your_mongo_connection String
+JWT_SECRET = ****************
+```
+8. Install Dependencies
+- ```bash
+npm install
+```
+9. run server
+    ```bash
+    nodemon start
+    ```
+
+
 In the output, you'll find options to open the app in a
 
 - [development build](https://docs.expo.dev/develop/development-builds/introduction/)
