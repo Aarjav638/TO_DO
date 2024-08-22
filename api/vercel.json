@@ -1,6 +1,6 @@
 {
     "version": 2,
-    "name": "TO_DO Server ",
+    "name": "To_Do Server",
     "builds": [
         {
             "src": "index.js",
@@ -9,7 +9,7 @@
     ],
     "routes": [
         {
-            "src": "/api",
+            "src": "/(.*)",
             "dest": "/index.js"
         }
     ]
