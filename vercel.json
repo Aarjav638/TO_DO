@@ -1,0 +1,16 @@
+{
+    "version": 2,
+    "name": "TO_DO Server ",
+    "builds": [
+        {
+            "src": "index.js",
+            "use": "@vercel/node"
+        }
+    ],
+    "routes": [
+        {
+            "src": "/api",
+            "dest": "/index.js"
+        }
+    ]
+}
