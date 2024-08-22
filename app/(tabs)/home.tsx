@@ -16,6 +16,7 @@ import AuthContext from "@/context/auth/authContext";
 import useNotes from "@/hooks/useNotes";
 import RenderHtml from "react-native-render-html";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useFocusEffect } from "@react-navigation/native";
 
 const HomeScreen: React.FC = () => {
   const { user } = useContext(AuthContext);
@@ -26,7 +27,7 @@ const HomeScreen: React.FC = () => {
   const { width } = useWindowDimensions();
   const [hasFetchedNotes, setHasFetchedNotes] = useState(false);
   // Effect to load notes from AsyncStorage when the component mounts
-  useEffect(() => {
+  useFocusEffect(() => {
     const fetchNotes = async () => {
       const storedNotes = await AsyncStorage.getItem("notes");
       if (storedNotes) {
@@ -39,13 +40,9 @@ const HomeScreen: React.FC = () => {
     if (!hasFetchedNotes) {
       fetchNotes();
     }
-  }, [hasFetchedNotes, notes]);
+  });
 
-  useEffect(() => {
-    if (hasFetchedNotes) {
-      syncNotesWithServer();
-    }
-  }, [hasFetchedNotes]);
+
   // Refresh notes by syncing with server
   const onRefresh = useCallback(async () => {
     try {

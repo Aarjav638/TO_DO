@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useState } from "react";
 import { ScrollView, Text, View, Image, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import images from "../constants/images";
@@ -6,12 +6,25 @@ import { StatusBar } from "expo-status-bar";
 import { useRouter } from "expo-router";
 
 import CustomButton from "../components/CustomButton";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const Index: React.FC = () => {
   const router = useRouter();
+  const [token , setToken]=useState<string>("")
 
   const handleGetStarted = useCallback(() => {
     console.log("Get Started");
+    const fetchToken=async()=>{
+      const token =await AsyncStorage.getItem("token") ;
+      if(token){
+        setToken(token);
+        console.log('token:',token)
+      }
+    }
+    fetchToken();
+    if(token){
+      router.push('/(tabs)')
+    }
     router.push("/signIn");
   }, [router]);
 
