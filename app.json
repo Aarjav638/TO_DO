@@ -8,8 +8,10 @@
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "splash": {
-      "image": "./assets/images/logo-samll.png",
+      "image": "./assets/images/logo-small.png",
       "resizeMode": "contain",
+      "height": 30 ,
+      "width":30,
       "backgroundColor": "#161622"
     },
     "ios": {
