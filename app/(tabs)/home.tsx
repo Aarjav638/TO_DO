@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext, useCallback } from "react";
+import React, { useState, useContext, useCallback } from "react";
 import {
   View,
   Text,
@@ -8,46 +8,50 @@ import {
   RefreshControl,
   useWindowDimensions,
   Alert,
+  ActivityIndicator,
+  TouchableOpacity,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Link, useRouter, useLocalSearchParams } from "expo-router";
+import { useRouter } from "expo-router";
 import CustomButton from "@/components/CustomButton";
 import AuthContext from "@/context/auth/authContext";
-import useNotes from "@/hooks/useNotes";
+import useNotes, { Note } from "@/hooks/useNotes";
 import RenderHtml from "react-native-render-html";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect } from "@react-navigation/native";
 
 const HomeScreen: React.FC = () => {
   const { user } = useContext(AuthContext);
-  const { notes, loadNotes, syncNotesWithServer } = useNotes();
+  const { syncNotesWithServer, notes, loadNotes } = useNotes();
   const [searchQuery, setSearchQuery] = useState("");
   const [refreshing, setRefreshing] = useState(false);
+  const [loading, setLoading] = useState(true);
   const router = useRouter();
   const { width } = useWindowDimensions();
   const [hasFetchedNotes, setHasFetchedNotes] = useState(false);
-  // Effect to load notes from AsyncStorage when the component mounts
-  useFocusEffect(() => {
-    const fetchNotes = async () => {
-      const storedNotes = await AsyncStorage.getItem("notes");
-      if (storedNotes) {
-        loadNotes(JSON.parse(storedNotes));
-        syncNotesWithServer();
-      }
-      setHasFetchedNotes(true);
-    };
-
-    if (!hasFetchedNotes) {
-      fetchNotes();
+  const loadNotesFromStorage = useCallback(async () => {
+    setLoading(true);
+    try {
+      console.log("Loading notes from AsyncStorage...");
+      await loadNotes();
+      await syncNotesWithServer();
+      setLoading(false);
+    } catch (error) {
+      console.error("Failed to load notes from storage:", error);
+      Alert.alert("An error occurred while loading notes");
+      setLoading(false);
     }
-  });
+  }, [loadNotes, syncNotesWithServer]);
 
+  useFocusEffect(
+    useCallback(() => {
+      loadNotesFromStorage();
+    }, [loadNotesFromStorage])
+  );
 
-  // Refresh notes by syncing with server
   const onRefresh = useCallback(async () => {
     try {
       setRefreshing(true);
-      await syncNotesWithServer();
+      await loadNotesFromStorage();
       setRefreshing(false);
       alert("Notes synced successfully");
     } catch (error) {
@@ -55,13 +59,35 @@ const HomeScreen: React.FC = () => {
       alert("An error occurred while syncing notes");
       setRefreshing(false);
     }
-  }, []);
+  }, [loadNotesFromStorage]);
+
+  const handleNavigateToDetails = async (noteId: string) => {
+    const noteExists = notes.some((note) => note._id === noteId);
+    if (noteExists) {
+      router.push(`/notedetails/${noteId}`);
+    } else {
+      Alert.alert("Error", "Note not found. Please try syncing your notes.");
+    }
+  };
 
   const filteredNotes = notes.filter(
     (note) =>
       note.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       note.description.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  if (loading) {
+    return (
+      <SafeAreaView
+        style={[
+          styles.safeArea,
+          { justifyContent: "center", alignItems: "center" },
+        ]}
+      >
+        <ActivityIndicator size="large" color="#FF8E01" />
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -79,13 +105,9 @@ const HomeScreen: React.FC = () => {
         data={filteredNotes}
         keyExtractor={(item) => item._id}
         renderItem={({ item }) => (
-          <Link
-            href={{
-              pathname: "/notedetails/[id]",
-              params: { id: item._id },
-            }}
-            key={item._id}
+          <TouchableOpacity
             style={styles.noteItem}
+            onPress={() => handleNavigateToDetails(item._id)}
           >
             <Text style={styles.noteTitle}>{item.title}</Text>
             <RenderHtml
@@ -93,7 +115,7 @@ const HomeScreen: React.FC = () => {
               source={{ html: item.description }}
               baseStyle={styles.noteDescription}
             />
-          </Link>
+          </TouchableOpacity>
         )}
         ListEmptyComponent={
           <Text style={styles.emptyText}>No notes available</Text>
@@ -142,6 +164,8 @@ const styles = StyleSheet.create({
     backgroundColor: "#232533",
     borderRadius: 12,
     padding: 16,
+    flexDirection: "column",
+    flex: 1,
     marginVertical: 8,
   },
   noteTitle: {

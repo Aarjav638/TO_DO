@@ -15,8 +15,9 @@ import useNotes from "@/hooks/useNotes";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { RichEditor, RichToolbar } from "react-native-pell-rich-editor";
 import * as ImagePicker from "expo-image-picker";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 const EditNotes: React.FC = () => {
-  const { addNote, updateNote, notes } = useNotes();
+  const { updateNote, notes } = useNotes();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const richText = useRef<RichEditor>(null);
@@ -75,67 +76,95 @@ const EditNotes: React.FC = () => {
       richText.current?.insertImage(result.assets[0].uri);
     }
   };
-  return (
-    <SafeAreaView style={styles.safeArea}>
-      <KeyboardAvoidingView
-        style={{ flex: 1 }}
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
+  if (!id) {
+    return (
+      <SafeAreaView
+        style={[styles.safeArea, { backgroundColor: "#161622", padding: 16 }]}
       >
-        <ScrollView contentContainerStyle={styles.scrollView}>
-          <View style={styles.container}>
-            <Text style={styles.header}>{"Edit Note"}</Text>
-            <FormField
-              title="Title"
-              value={title}
-              placeholder="Enter title"
-              handleChange={setTitle}
-              textInputStyles={styles.formField}
-            />
-            <RichEditor
-              ref={richText}
-              style={styles.richTextEditor}
-              placeholder="Enter description"
-              initialContentHTML={description}
-              onChange={(text) => setDescription(text)}
-            />
-            <RichToolbar
-              editor={richText}
-              actions={[
-                "bold",
-                "italic",
-                "underline",
-                "unorderedList",
-                "orderedList",
-                "link",
-                "customImage",
-              ]}
-              iconMap={{
-                customImage: () => <Text onPress={pickImage}>🖼️</Text>,
-              }}
-            />
-            <CustomButton
-              title="Save Note"
-              onPress={handleSaveNote}
-              containerStyles={styles.saveButton}
-            />
-          </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+        <Text style={styles.header}>{"Edit Note"}</Text>
+        <View style={{ flex: 1, justifyContent: "center" }}>
+          <Text style={[styles.descriptionLabel, { textAlign: "center" }]}>
+            {"Note not found"}
+          </Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  return (
+    <GestureHandlerRootView
+      style={{ flex: 1, backgroundColor: "#161622", padding: 14 }}
+    >
+      <SafeAreaView style={styles.safeArea}>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          style={{ flex: 1 }}
+          keyboardVerticalOffset={Platform.OS === "ios" ? 40 : 50}
+        >
+          <ScrollView
+            contentContainerStyle={styles.scrollView}
+            showsVerticalScrollIndicator={false}
+          >
+            <View style={styles.container}>
+              <Text style={styles.header}>{"Edit Note"}</Text>
+              <FormField
+                title="Title"
+                value={title}
+                placeholder="Enter title"
+                handleChange={setTitle}
+                textInputStyles={styles.formField}
+              />
+              <Text style={styles.descriptionLabel}>Description</Text>
+              <View style={styles.richEditorContainer}>
+                <RichToolbar
+                  style={{ backgroundColor: "#232533" }}
+                  selectedIconTint="#FF8E01"
+                  editor={richText}
+                  actions={[
+                    "bold",
+                    "italic",
+                    "underline",
+                    "unorderedList",
+                    "orderedList",
+                    "link",
+                    "customImage",
+                  ]}
+                  iconMap={{
+                    customImage: () => <Text onPress={pickImage}>🖼️</Text>,
+                  }}
+                />
+                <RichEditor
+                  ref={richText}
+                  style={styles.richTextEditor}
+                  placeholder="Enter description"
+                  initialContentHTML={description}
+                  onChange={(text) => setDescription(text)}
+                />
+              </View>
+              <CustomButton
+                title="Save Note"
+                onPress={handleSaveNote}
+                containerStyles={styles.saveButton}
+              />
+            </View>
+          </ScrollView>
+        </KeyboardAvoidingView>
+      </SafeAreaView>
+    </GestureHandlerRootView>
   );
 };
 
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: "#161622",
-    padding: 16,
   },
   scrollView: {
     flexGrow: 1,
+    paddingBottom: 20,
   },
   container: {
     flex: 1,
+    justifyContent: "space-between",
   },
   header: {
     fontSize: 24,
@@ -145,22 +174,29 @@ const styles = StyleSheet.create({
   },
   formField: {
     marginBottom: 20,
+    fontFamily: "Poppins-Bold",
+  },
+  descriptionLabel: {
+    color: "#FFFFFF",
+    marginBottom: 10,
+    fontSize: 16,
+    fontFamily: "Poppins-Bold",
+  },
+  richEditorContainer: {
+    flex: 1,
+    backgroundColor: "#1E1E2D",
+    borderColor: "#232533",
+    borderWidth: 1,
+    borderRadius: 12,
+    marginBottom: 40,
+    minHeight: 300,
   },
   richTextEditor: {
     backgroundColor: "#1E1E2D",
     color: "#FFFFFF",
-    borderColor: "#232533",
-    borderWidth: 2,
+    minHeight: 300, // Ensure the RichEditor has a minimum height
+
     borderRadius: 12,
-    padding: 16,
-    minHeight: 120,
-  },
-  richToolbar: {
-    backgroundColor: "#1E1E2D",
-    borderColor: "#232533",
-    borderWidth: 2,
-    borderRadius: 12,
-    marginTop: 10,
   },
   saveButton: {
     marginTop: 20,

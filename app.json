@@ -8,10 +8,7 @@
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "splash": {
-      "image": "./assets/images/logo-small.png",
-      "resizeMode": "contain",
-      "height": 30 ,
-      "width":30,
+      "image": "./assets/icons/logo.png",
       "backgroundColor": "#161622"
     },
     "ios": {
@@ -19,9 +16,9 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/logo-small.png",
+        "foregroundImage": "./assets/icons/logo.png",
         "backgroundColor": "#161622",
-        "icon": "./assets/images/logo-small.png"
+        "icon": "./assets/icons/logo.png"
       },
       "permissions": [
         "READ_EXTERNAL_STORAGE",

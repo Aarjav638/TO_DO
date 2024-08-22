@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   View,
   Text,
@@ -11,25 +11,49 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import CustomButton from "@/components/CustomButton";
 import useNotes, { Note } from "@/hooks/useNotes"; // Import Note type
-
-interface NoteDetails extends Note {
-  image: string;
-}
 import * as FileSystem from "expo-file-system";
 import * as Sharing from "expo-sharing";
 import * as Print from "expo-print";
 import { manipulateAsync } from "expo-image-manipulator";
+import { set } from "lodash";
 
+interface NoteDetails extends Note {
+  image: string;
+}
 const NoteDetails: React.FC = () => {
-  const { notes, deleteNote, syncNotesWithServer } = useNotes();
+  const { notes, deleteNote } = useNotes();
   const router = useRouter();
-  const { id, uri } = useLocalSearchParams<{ id: string; uri: string }>();
-  const [showModal, setShowModal] = React.useState(false);
-  // Find the note with the matching id
-  const note: Note | undefined = notes.find((n) => n._id === id);
-  console.log("note", note);
-  console.log("uri", note?.image);
-  // Handle case where note is not found
+  const { id } = useLocalSearchParams<{ id: string }>();
+  const [loading, setLoading] = React.useState(true);
+  const [note, setNote] = React.useState<Note>();
+
+  useEffect(() => {
+    if (id) {
+      setLoading(true);
+      const note = notes.find((n) => n._id === id);
+      if (note) {
+        console.log("Note", note);
+        setNote(note);
+        setLoading(false);
+      }
+    }
+  }, [id, notes]);
+
+  if (loading) {
+    return (
+      <SafeAreaView
+        style={[
+          styles.safeArea,
+          { justifyContent: "center", alignItems: "center" },
+        ]}
+      >
+        <ActivityIndicator size="large" color="#FF8E01" />
+      </SafeAreaView>
+    );
+  }
+  console.log("id", id);
+  // console.log("Note", note);
+
   if (!note) {
     return (
       <SafeAreaView style={styles.safeArea}>
@@ -42,16 +66,13 @@ const NoteDetails: React.FC = () => {
 
   const handleDelete = async () => {
     try {
-      setShowModal(true); // Show modal immediately when the delete process starts
       await deleteNote(id!);
-      setShowModal(false); // Hide modal after deletion
       Alert.alert(
         "Success",
         "Note deleted successfully 🎉\n Pull down to refresh "
       );
       router.push("/home");
     } catch (error) {
-      setShowModal(false); // Hide modal even if an error occurs
       Alert.alert("Error", "An error occurred while deleting the note");
     }
   };
@@ -140,21 +161,6 @@ const NoteDetails: React.FC = () => {
           containerStyles={styles.deleteButton}
         />
       </View>
-      <Modal
-        animationType="fade"
-        transparent={true}
-        visible={showModal}
-        onRequestClose={() => {
-          setShowModal(false);
-        }}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContainer}>
-            <ActivityIndicator size="large" color="#FF8E01" />
-            <Text style={styles.modalText}>deleting...</Text>
-          </View>
-        </View>
-      </Modal>
     </SafeAreaView>
   );
 };
